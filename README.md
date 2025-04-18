@@ -1,2 +1,2 @@
 # proyecto-grafica
- Proyecto Final Computación Gráfica
+ Proyecto Final de Computación Gráfica e Interacción Humano-Computadora
