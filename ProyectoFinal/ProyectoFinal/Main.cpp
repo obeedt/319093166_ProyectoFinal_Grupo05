@@ -170,7 +170,7 @@ int main() {
 
 		// Render
 		// Clear the colorbuffer
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -197,90 +197,33 @@ int main() {
 
 		glBindVertexArray(VAO);
 
-		model = glm::mat4(1.0f);
-		//agregamos estas lineas
-		model = glm::scale(model, glm::vec3(3.0f, 0.1f, 2.0f));
-		model = glm::translate(model, glm::vec3(0.0f, 0.6f, 0.0f));
-
+		// ====== BASE DEL SUELO ======
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.05f, 0.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 0.1f, 10.0f)); // muy delgado en Y
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		//DIBUJAR MESA
-		//pata 1
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f)); //tamaño de la pata
-		model = glm::translate(model, glm::vec3(14.5f, -0.35f, 9.5f));
+		// ====== PARED TRASERA ====== (al fondo)
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.5f, -5.0f)); // mitad de altura y hacia atrás
+		model = glm::scale(model, glm::vec3(10.0f, 5.0f, 0.1f)); // delgada en Z
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		//pata 2
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f)); //tamaño de la pata
-		model = glm::translate(model, glm::vec3(-14.5f, -0.35f, -9.5f));
+		// ====== PARED FRONTAL ====== (al frente)
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.5f, 5.0f)); // hacia adelante
+		model = glm::scale(model, glm::vec3(10.0f, 5.0f, 0.1f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		//pata 3
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f)); //tamaño de la pata
-		model = glm::translate(model, glm::vec3(14.5f, -0.35f, -9.5f));
+		// ====== PARED IZQUIERDA ======
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 2.5f, 0.0f)); // hacia la izquierda
+		model = glm::scale(model, glm::vec3(0.1f, 5.0f, 10.0f)); // delgada en X
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		//pata 4
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f)); //tamaño de la pata
-		model = glm::translate(model, glm::vec3(-14.5f, -0.35f, 9.5f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-		//DIBUJAR SILLA
-		//pata 1
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.65f, 0.1f));
-		model = glm::translate(model, glm::vec3(2.5f, 0.6f, 2.5f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		////pata 2
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 1.7f, 0.1f));
-		model = glm::translate(model, glm::vec3(-2.5f, 0.55f, -2.5f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		////pata 3
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.65f, 0.1f));
-		model = glm::translate(model, glm::vec3(2.5f, 0.6f, -2.5f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		////pata 4
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 1.7f, 0.1f));
-		model = glm::translate(model, glm::vec3(-2.5f, 0.55f, 2.5f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		////asiento
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.8f, 0.1f, 0.8f));
-		model = glm::translate(model, glm::vec3(0.05f, 7.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		////respaldo
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.8f, 0.11f));
-		model = glm::translate(model, glm::vec3(-2.5f, 1.4f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.2f, 0.6f));
-		model = glm::translate(model, glm::vec3(-2.5f, 7.8f, 0.0f));
+		// ====== PARED DERECHA ======
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 2.5f, 0.0f)); // hacia la derecha
+		model = glm::scale(model, glm::vec3(0.1f, 5.0f, 10.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
