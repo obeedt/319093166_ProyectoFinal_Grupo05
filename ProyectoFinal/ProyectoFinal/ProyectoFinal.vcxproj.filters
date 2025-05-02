@@ -20,8 +20,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Shader.h">
+    <None Include="Shader\core.frag">
       <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
+    </None>
+    <None Include="Shader\core.vs">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Shader\modelLoading.frag">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Shader\modelLoading.vs">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
   </ItemGroup>
 </Project>
