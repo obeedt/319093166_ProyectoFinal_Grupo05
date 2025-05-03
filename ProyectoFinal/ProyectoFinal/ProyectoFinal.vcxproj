@@ -27,6 +27,11 @@
     <None Include="Shader\modelLoading.frag" />
     <None Include="Shader\modelLoading.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="Shader.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
