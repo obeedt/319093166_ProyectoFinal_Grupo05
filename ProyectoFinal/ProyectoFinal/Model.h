@@ -128,6 +128,20 @@ private:
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 			}
 
+			// Colors
+			// Extraer color difuso (Kd) del material si existe
+			glm::vec3 color(1.0f); // blanco por defecto
+			if (mesh->mMaterialIndex >= 0) {
+				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+				aiColor3D kdColor(1.0f, 1.0f, 1.0f); // blanco por defecto
+				if (material->Get(AI_MATKEY_COLOR_DIFFUSE, kdColor) == AI_SUCCESS) {
+					color.r = kdColor.r;
+					color.g = kdColor.g;
+					color.b = kdColor.b;
+				}
+			}
+			vertex.Color = color;
+
 			vertices.push_back(vertex);
 		}
 
