@@ -27,6 +27,8 @@ struct Vertex
 	glm::vec3 Normal;
 	// TexCoords
 	glm::vec2 TexCoords;
+	// Color
+	glm::vec3 Color;
 };
 
 struct Texture
@@ -137,6 +139,11 @@ private:
 		// Vertex Texture Coords
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *)offsetof(Vertex, TexCoords));
+
+		// Vertex color
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+
 
 		glBindVertexArray(0);
 	}
