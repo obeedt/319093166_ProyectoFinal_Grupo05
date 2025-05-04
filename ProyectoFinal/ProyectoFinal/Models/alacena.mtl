@@ -1,30 +1,28 @@
-newmtl Maya_Lambert1SG
+newmtl lambert6SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl initialShadingGroup
+map_Kd color_amarillo.jpg
+Ni 1.00
+newmtl lambert7SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl lambert2SG
-illum 4
-Kd 0.97 0.98 0.86
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
+map_Kd color_blanco.jpg
 Ni 1.00
-newmtl lambert3SG
+newmtl lambert8SG
 illum 4
-Kd 0.06 0.05 0.02
+Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
+map_Kd color_cafe.jpg
 Ni 1.00
-newmtl lambert4SG
+newmtl lambert9SG
 illum 4
-Kd 0.16 0.16 0.16
+Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
+map_Kd color_gris.jpg
 Ni 1.00
