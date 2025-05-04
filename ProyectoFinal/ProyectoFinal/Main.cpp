@@ -115,7 +115,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Fuentes de luz", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Final - Computación Gráfica", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -159,6 +159,8 @@ int main()
 	Model Campana((char*)"Models/campana.obj");
 	Model Estufa((char*)"Models/estufa.obj");
 	Model Mesa((char*)"Models/mesa.obj");
+	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
+	Model Piso_Cocina((char*)"Models/piso_cocina.obj");
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
@@ -315,6 +317,14 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(lightingShader);
+		//Pared
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Cocina.Draw(lightingShader);
+		//Piso
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Piso_Cocina.Draw(lightingShader);
 		//Refrigerador
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
