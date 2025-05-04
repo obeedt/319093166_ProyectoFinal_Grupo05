@@ -154,9 +154,14 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
-	Model Dog((char*)"Models/mesa.obj");
-	Model Piso((char*)"Models/piso.obj");
-
+	// Load models
+	Model Alacena((char*)"Models/alacena.obj");
+	Model Campana((char*)"Models/campana.obj");
+	Model Estufa((char*)"Models/estufa.obj");
+	Model Mesa((char*)"Models/mesa.obj");
+	Model Refrigerador((char*)"Models/refrigerador.obj");
+	Model Silla((char*)"Models/silla.obj");
+	Model Tostadora((char*)"Models/tostadora.obj");
 
 
 	// First, set the container's VAO (and VBO)
@@ -199,11 +204,6 @@ int main()
 
 		// OpenGL options
 		glEnable(GL_DEPTH_TEST);
-
-
-
-		//Load Model
-
 
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
@@ -296,22 +296,37 @@ int main()
 
 
 
-		//Carga de modelo 
+		//Carga de modelos
 		view = camera.GetViewMatrix();
+
+		//Alacena
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Piso.Draw(lightingShader);
-
-
-
+		Alacena.Draw(lightingShader);
+		//Campana
 		model = glm::mat4(1);
-		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
-		Dog.Draw(lightingShader);
-		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
-		glBindVertexArray(0);
+		Campana.Draw(lightingShader);
+		//Estufa
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Estufa.Draw(lightingShader);
+		//Mesa
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.Draw(lightingShader);
+		//Refrigerador
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Refrigerador.Draw(lightingShader);
+		//Silla
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Silla.Draw(lightingShader);
+		//Tostadora
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Tostadora.Draw(lightingShader);
 
 
 		// Also draw the lamp object, again binding the appropriate shader
