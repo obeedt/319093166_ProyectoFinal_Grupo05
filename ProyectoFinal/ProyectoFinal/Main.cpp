@@ -373,33 +373,30 @@ int main()
 // Moves/alters the camera positions based on user input
 void DoMovement()
 {
-
-	// Camera controls
-	if (keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])
+	float multiplier = 1.0f;
+	if (keys[GLFW_KEY_LEFT_CONTROL])
 	{
-		camera.ProcessKeyboard(FORWARD, deltaTime);
-
+		multiplier = 5.0f;
 	}
 
-	if (keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN])
-	{
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
-
-
+	if (keys[GLFW_KEY_W]) {
+		camera.ProcessKeyboard(FORWARD, deltaTime * multiplier);
+	}
+	if (keys[GLFW_KEY_S]) {
+		camera.ProcessKeyboard(BACKWARD, deltaTime * multiplier);
+	}
+	if (keys[GLFW_KEY_A]) {
+		camera.ProcessKeyboard(LEFT, deltaTime * multiplier);
+	}
+	if (keys[GLFW_KEY_D]) {
+		camera.ProcessKeyboard(RIGHT, deltaTime * multiplier);
 	}
 
-	if (keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT])
-	{
-		camera.ProcessKeyboard(LEFT, deltaTime);
-
-
+	if (keys[GLFW_KEY_SPACE]) {
+		camera.ProcessKeyboard(UP, deltaTime * multiplier);
 	}
-
-	if (keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT])
-	{
-		camera.ProcessKeyboard(RIGHT, deltaTime);
-
-
+	if (keys[GLFW_KEY_LEFT_SHIFT]) {
+		camera.ProcessKeyboard(DOWN, deltaTime * multiplier);
 	}
 
 	if (keys[GLFW_KEY_T])
@@ -451,18 +448,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 
-	if (keys[GLFW_KEY_SPACE])
-	{
-		active = !active;
-		if (active)
-		{
-			Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
-		}
-		else
-		{
-			Light1 = glm::vec3(0);//Cuado es solo un valor en los 3 vectores pueden dejar solo una componente
-		}
-	}
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
