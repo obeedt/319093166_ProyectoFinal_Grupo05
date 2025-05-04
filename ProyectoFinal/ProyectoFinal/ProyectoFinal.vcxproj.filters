@@ -32,6 +32,18 @@
     <None Include="Shader\modelLoading.vs">
       <Filter>Archivos de encabezado</Filter>
     </None>
+    <None Include="Shader\lamp.frag">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Shader\lamp.vs">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Shader\lighting.frag">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Shader\lighting.vs">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
