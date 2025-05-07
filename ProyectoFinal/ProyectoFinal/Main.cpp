@@ -28,6 +28,8 @@
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
+// Function prototypes (añade esto junto con las otras declaraciones)
+void drawCoordinateAxes();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -184,7 +186,6 @@ int main()
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
-
 		// Calculate deltatime of current frame
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -244,8 +245,39 @@ int main()
 		//Carga de modelos
 		view = camera.GetViewMatrix();
 
+		//Casa
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Casa.Draw(lightingShader);
+		//Piso
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-16.77f, 4.1f, -9.6f));
+		model = glm::scale(model, glm::vec3(0.85f, 1.0f, 0.85f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Piso_Cocina.Draw(lightingShader);
+		//Pared izquierda
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-15.57f, 3.3f, -9.6f));
+		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 0.85f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Cocina.Draw(lightingShader);
+		//Pared derecha
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(3.0f, 3.3f, -9.6f));
+		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 0.85f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Cocina.Draw(lightingShader);
+		//Pared posterior
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-15.77f, 3.3f, -32.3f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
+		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 0.85f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Cocina.Draw(lightingShader);
 		//Alacena
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(16.77f / 0.85f, -4.1f, 9.6f / 0.85f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Alacena.Draw(lightingShader);
 		//Campana
@@ -260,14 +292,7 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(lightingShader);
-		//Pared
-		model = glm::mat4(1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Pared_Cocina.Draw(lightingShader);
-		//Piso
-		model = glm::mat4(1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Piso_Cocina.Draw(lightingShader);
+		
 		//Refrigerador
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -280,22 +305,7 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
-		//PiezaL
-		model = glm::mat4(1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		PiezaL.Draw(lightingShader);
-		//Casa
-		model = glm::mat4(1);
-		model = glm::scale(model, glm::vec3(6.0f)); // Escala uniforme de 2x
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Casa.Draw(lightingShader);
-		//Escaleras
-		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f)); // Escala uniforme de 2x
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Escaleras.Draw(lightingShader);
-
+		
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -309,6 +319,20 @@ int main()
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		// Swap the screen buffers
+		// Dibujar ejes de coordenadas
+		lampShader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		// Dibujar ejes de coordenadas
+		lampShader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		glm::mat4 axisModel = glm::mat4(1.0f);
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(axisModel));
+
+		drawCoordinateAxes(); // ¡Ahora el compilador la reconoce!
 		glfwSwapBuffers(window);
 	}
 
@@ -417,4 +441,42 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	lastY = yPos;
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
+}
+void drawCoordinateAxes() {
+	float axisVertices[] = {
+		// Eje X (Rojo)
+		0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Origen (rojo)
+		5.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // X positivo (rojo, 5 unidades)
+
+		// Eje Y (Verde)
+		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Origen (verde)
+		0.0f, 5.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y positivo (verde, 5 unidades)
+
+		// Eje Z (Azul)
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Origen (azul)
+		0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 1.0f  // Z positivo (azul, 5 unidades)
+	};
+
+	GLuint axisVAO, axisVBO;
+	glGenVertexArrays(1, &axisVAO);
+	glGenBuffers(1, &axisVBO);
+
+	glBindVertexArray(axisVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices, GL_STATIC_DRAW);
+
+	// Posición (atributo 0)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// Color (atributo 1)
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_LINES, 0, 6); // Dibuja las líneas
+
+	// Limpieza
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &axisVAO);
+	glDeleteBuffers(1, &axisVBO);
 }
