@@ -158,8 +158,7 @@ int main()
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
-	Model Balcon((char*)"Models/balcon.obj");
-
+	Model Casa((char*)"Models/casa.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -281,11 +280,21 @@ int main()
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
-		//Balcon
+		//PiezaL
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Balcon.Draw(lightingShader);
-
+		PiezaL.Draw(lightingShader);
+		//Casa
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(6.0f)); // Escala uniforme de 2x
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Casa.Draw(lightingShader);
+		//Escaleras
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f)); // Escala uniforme de 2x
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Escaleras.Draw(lightingShader);
 
 
 		// Also draw the lamp object, again binding the appropriate shader
