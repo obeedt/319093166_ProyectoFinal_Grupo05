@@ -354,6 +354,8 @@ int main()
 
 		//Tostadora
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-11.5f, 4.74f, -16.5f));
+		model = glm::rotate(model, glm::radians(315.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
 		
