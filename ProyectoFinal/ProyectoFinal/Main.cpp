@@ -255,8 +255,9 @@ int main()
 		////////////////////////-Cocina-////////////////////////////////
 		//Piso
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-16.77f, 4.1f, -9.6f));
-		model = glm::scale(model, glm::vec3(0.85f, 1.0f, 0.85f));
+		model = glm::translate(model, glm::vec3(-16.77f, 4.1f, -15.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.85f, 1.0f, 2.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
 		//Pared izquierda
@@ -273,9 +274,9 @@ int main()
 		Pared_Cocina.Draw(lightingShader);
 		//Pared posterior
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-15.77f, 3.3f, -32.3f));
+		model = glm::translate(model, glm::vec3(-10.77f, 3.3f, -32.3f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
-		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 0.85f));
+		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.3f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Cocina.Draw(lightingShader);
 
