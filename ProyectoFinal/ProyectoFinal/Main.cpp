@@ -46,7 +46,7 @@ glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
 
 
-
+glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -93,7 +93,11 @@ float vertices[] = {
 
 
 glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f); 
-//bool active = true;
+
+// Luces puntuales
+glm::vec3 pointLightPositions[] = {
+	glm::vec3(-14.0f, 12.0f, -11.0f),
+};
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -216,7 +220,7 @@ int main()
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
 
-		// Luz direccional (sol)
+		// Luz direccional
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.5f, 0.5f, 0.5f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.8f, 0.8f, 0.8f);
@@ -228,6 +232,17 @@ int main()
 		// Set material properties
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 16.0f);
 
+
+		// Configuración de la luz puntual
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.position"),
+			pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.diffuse"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.linear"), 0.09f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.quadratic"), 0.032f);
+		
 		// Create camera transformations
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
@@ -262,8 +277,8 @@ int main()
 		Piso_Cocina.Draw(lightingShader);
 		//Techo
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(4.0f, 13.0f, 4.0f));
-		model = glm::scale(model, glm::vec3(2.6f, 1.0f, 2.1));
+		model = glm::translate(model, glm::vec3(3.75f, 13.0f, 2.65f));
+		model = glm::scale(model, glm::vec3(2.55f, 1.0f, 1.75));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
 
@@ -296,6 +311,13 @@ int main()
 		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.28f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Cocina.Draw(lightingShader);
+		//Pared anterior
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-10.2f, 3.3f, -14.2f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.28f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Cocina.Draw(lightingShader);
 		////Ventana
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-20.0f, 10.2f, -20.37f));
@@ -303,10 +325,16 @@ int main()
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Ventana_Cocina.Draw(lightingShader);
-		//Puerta
+		//Puerta interior
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-4.8f, 7.2f, -20.15f));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta_Cocina.Draw(lightingShader);
+		//Puerta exterior
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-4.8f, 7.2f, -21.35f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta_Cocina.Draw(lightingShader);
 		//Pared Madera 1
@@ -419,6 +447,17 @@ int main()
 		lampShader.Use();
 		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		for (int i = 0; i < 1; i++) {
+			glm::mat4 model(1);
+			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::scale(model, glm::vec3(0.2f));
+			glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			glUniform3f(glGetUniformLocation(lampShader.Program, "lampColor"), 1.0f, 1.0f, 1.0f);
+
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+		}
 
 		// Dibujar ejes de coordenadas
 		//lampShader.Use();
@@ -472,32 +511,32 @@ void DoMovement()
 		camera.ProcessKeyboard(DOWN, deltaTime * multiplier);
 	}
 
-	/*if (keys[GLFW_KEY_T])
+	if (keys[GLFW_KEY_K])
 	{
-		pointLightPositions[0].x += 0.01f;
+		pointLightPositions[0].x += 0.3f;
 	}
-	if (keys[GLFW_KEY_G])
-	{
-		pointLightPositions[0].x -= 0.01f;
-	}
-
-	if (keys[GLFW_KEY_Y])
-	{
-		pointLightPositions[0].y += 0.01f;
-	}
-
 	if (keys[GLFW_KEY_H])
 	{
-		pointLightPositions[0].y -= 0.01f;
+		pointLightPositions[0].x -= 0.3f;
+	}
+
+	if (keys[GLFW_KEY_I])
+	{
+		pointLightPositions[0].y += 0.3f;
+	}
+
+	if (keys[GLFW_KEY_M])
+	{
+		pointLightPositions[0].y -= 0.3f;
 	}
 	if (keys[GLFW_KEY_U])
 	{
-		pointLightPositions[0].z -= 0.1f;
+		pointLightPositions[0].z -= 0.3f;
 	}
 	if (keys[GLFW_KEY_J])
 	{
-		pointLightPositions[0].z += 0.01f;
-	}*/
+		pointLightPositions[0].z += 0.3f;
+	}
 
 }
 
