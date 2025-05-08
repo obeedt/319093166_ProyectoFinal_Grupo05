@@ -36,7 +36,9 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 5.0f, 85.0f));
+//Camera  camera(glm::vec3(0.0f, 5.0f, 85.0f));
+Camera  camera(glm::vec3(0.0f, 0.0f, 0.0f));
+
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -154,13 +156,14 @@ int main()
 	Model Casa((char*)"Models/casa.obj");
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
 	Model Ventana_Cocina((char*)"Models/ventana_cocina.obj");
+	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
 	Model Pared_Madera((char*)"Models/pared_madera.obj");
+	Model Piso_Cocina((char*)"Models/piso_cocina.obj");
 	Model Alacena((char*)"Models/alacena.obj");
+	Model Alacena_Superior((char*)"Models/alacena_superior.obj");
 	Model Campana((char*)"Models/campana.obj");
 	Model Estufa((char*)"Models/estufa.obj");
 	Model Mesa((char*)"Models/mesa.obj");
-	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
-	Model Piso_Cocina((char*)"Models/piso_cocina.obj");
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
@@ -265,7 +268,7 @@ int main()
 			glm::mix(dayShininess, nightShininess, lerpFactor));
 
 
-		// Configuración de la luz puntual
+		// Configuración de la luz puntual 1
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.position"),
 			pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.ambient"), 0.2f, 0.2f, 0.2f);
@@ -274,7 +277,7 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.quadratic"), 0.032f);
-		
+
 		// Create camera transformations
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
@@ -352,8 +355,8 @@ int main()
 		Pared_Cocina.Draw(lightingShader);
 		////Ventana
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-20.0f, 10.2f, -20.37f));
-		model = glm::scale(model, glm::vec3(3.5f, 3.5f, 1.0f));
+		model = glm::translate(model, glm::vec3(-21.2f, 10.2f, -20.37f));
+		model = glm::scale(model, glm::vec3(3.35f, 3.35f, 1.0f));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Ventana_Cocina.Draw(lightingShader);
@@ -413,6 +416,13 @@ int main()
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Alacena.Draw(lightingShader);
+		//Alacena 6
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-15.0f, 11.5f, -19.1f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Alacena_Superior.Draw(lightingShader);
+
 
 		////Estufa
 		model = glm::mat4(1);
