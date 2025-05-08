@@ -151,6 +151,10 @@ int main()
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
 	// Load models
+	Model Casa((char*)"Models/casa.obj");
+	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
+	Model Ventana_Cocina((char*)"Models/ventana_cocina.obj");
+	Model Pared_Madera((char*)"Models/pared_madera.obj");
 	Model Alacena((char*)"Models/alacena.obj");
 	Model Campana((char*)"Models/campana.obj");
 	Model Estufa((char*)"Models/estufa.obj");
@@ -160,7 +164,7 @@ int main()
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
-	Model Casa((char*)"Models/casa.obj");
+	
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -279,6 +283,18 @@ int main()
 		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.3f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Cocina.Draw(lightingShader);
+		//Puerta
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta_Cocina.Draw(lightingShader);
+		//Ventana
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Ventana_Cocina.Draw(lightingShader);
+		//Pared Madera
+		model = glm::mat4(1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pared_Madera.Draw(lightingShader);
 
 		//Alacena 1
 		model = glm::mat4(1);
