@@ -36,8 +36,8 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-//Camera  camera(glm::vec3(0.0f, 5.0f, 85.0f));
-Camera  camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera  camera(glm::vec3(0.0f, 5.0f, 85.0f));
+//Camera  camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
@@ -49,7 +49,9 @@ glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
 bool isNight = false; // Para determinar si es de noche o día
 float transitionSpeed = 1.0f; // Velocidad de transición de día a noche
-bool keyPressed = false; // Para almacenar el estado previo de la tecla V
+bool keyPressed = false; // Para almacenar el estado previo de la tecla N
+bool lightsOff = false;
+bool keyPressed2 = false; // Para almacenar el estado previo de la tecla L
 
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 float vertices[] = {
@@ -96,13 +98,94 @@ float vertices[] = {
 	   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
+// Nuevas variables para el skybox
+GLuint skyboxVAO, skyboxVBO;
+GLuint cubemapTexture;
+//Shader skyboxShader("Shader/skybox.vert", "Shader/skybox.frag");
+
+// Vertices para el skybox (un cubo grande)
+float skyboxVertices[] = {
+	// positions          
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
+
 
 glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f); 
 
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
-	glm::vec3(-14.0f, 12.0f, -11.0f),
+	glm::vec3(-14.0f, 12.5f, -11.0f),
 };
+
+unsigned int loadCubemap(vector<std::string> faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = SOIL_load_image(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			SOIL_free_image_data(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			SOIL_free_image_data(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -147,7 +230,29 @@ int main()
 	// Define the viewport dimensions
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	// Configurar skybox VAO
+	//glGenVertexArrays(1, &skyboxVAO);
+	//glGenBuffers(1, &skyboxVBO);
+	//glBindVertexArray(skyboxVAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+	//// Cargar texturas del skybox
+	//vector<std::string> faces = {
+	//	"Textures/Skybox/maderaBlanco.jpg",
+	//	"Textures/Skybox/maderaCasa.jpg",
+	//	"Textures/Skybox/maderaBlanco.jpg",
+	//	"Textures/Skybox/maderaCasa.jpg",
+	//	"Textures/Skybox/maderaBlanco.jpg",
+	//	"Textures/Skybox/maderaCasa.jpg"
+	//};
+	//cubemapTexture = loadCubemap(faces);
+
+	//// Configurar shader del skybox
+	//skyboxShader.Use();
+	//glUniform1i(glGetUniformLocation(skyboxShader.Program, "skybox"), 0);
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
@@ -157,10 +262,12 @@ int main()
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
 	Model Ventana_Cocina((char*)"Models/ventana_cocina.obj");
 	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
+	Model Pared_Cocina_Anterior((char*)"Models/pared_cocina_anterior.obj");
 	Model Pared_Madera((char*)"Models/pared_madera.obj");
 	Model Piso_Cocina((char*)"Models/piso_cocina.obj");
 	Model Alacena((char*)"Models/alacena.obj");
 	Model Alacena_Superior((char*)"Models/alacena_superior.obj");
+	Model Alacena_Grande((char*)"Models/alacena_grande.obj");
 	Model Campana((char*)"Models/campana.obj");
 	Model Estufa((char*)"Models/estufa.obj");
 	Model Mesa((char*)"Models/mesa.obj");
@@ -269,11 +376,21 @@ int main()
 
 
 		// Configuración de la luz puntual 1
+		float lightsOffFactor = lightsOff ? 0.0f : 1.0f; // Factor de luz apagada
+		float lerpFactor2 = lightsOff * 1.0f; // Factor de interpolación
+
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.position"),
 			pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.ambient"), 0.2f, 0.2f, 0.2f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.diffuse"), 1.0f, 1.0f, 1.0f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.specular"), 1.0f, 1.0f, 1.0f);
+
+		// Aplicar el factor de toggle a los componentes de luz
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.ambient"),
+			0.2f * lightsOffFactor, 0.2f * lightsOffFactor, 0.2f * lightsOffFactor);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.diffuse"),
+			1.5f * lightsOffFactor, 1.5f * lightsOffFactor, 1.5f * lightsOffFactor);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.specular"),
+			1.0f * lightsOffFactor, 1.0f * lightsOffFactor, 1.0f * lightsOffFactor);
+
+		// Estos parámetros no necesitan el factor
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.quadratic"), 0.032f);
@@ -352,7 +469,7 @@ int main()
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.28f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Pared_Cocina.Draw(lightingShader);
+		Pared_Cocina_Anterior.Draw(lightingShader);
 		////Ventana
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-21.2f, 10.2f, -20.37f));
@@ -422,16 +539,25 @@ int main()
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Alacena_Superior.Draw(lightingShader);
+		//Alacena 7
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-25.5f, 9.8f, -17.0f));
+		model = glm::scale(model, glm::vec3(1.2f, 1.2f, 1.2f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Alacena_Grande.Draw(lightingShader);
 
 
 		////Estufa
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-21.15f, 5.91f, -23.85f));
+		model = glm::translate(model, glm::vec3(-21.15f, 5.91f, -23.85f));	
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Estufa.Draw(lightingShader);
 		////Campana
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-19.2f, 6.1f, -23.4f));
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
+
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Campana.Draw(lightingShader);
 		
@@ -473,6 +599,20 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
 		
+		//glDepthFunc(GL_LEQUAL);  // Cambiar la función de profundidad
+		//skyboxShader.Use();
+		//glm::mat4 view = camera.GetViewMatrix();
+		//view = glm::mat4(glm::mat3(view));
+		//glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		//glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		//// skybox cube
+		//glBindVertexArray(skyboxVAO);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glBindVertexArray(0);
+		//glDepthFunc(GL_LESS); // Volver a la función de profundidad por defecto
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -500,6 +640,8 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 			glBindVertexArray(0);
 		}
+
+
 
 		// Dibujar ejes de coordenadas
 		//lampShader.Use();
@@ -607,6 +749,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	else if (!keys[GLFW_KEY_N]) {
 		keyPressed = false; // Si la tecla se ha soltado, resetea el estado
+	}
+
+	if (keys[GLFW_KEY_L] && !keyPressed) {
+		lightsOff = !lightsOff; // Alterna entre noche y día
+		keyPressed2 = true; // Marca que la tecla ha sido presionada
+	}
+	else if (!keys[GLFW_KEY_L]) {
+		keyPressed2 = false; // Si la tecla se ha soltado, resetea el estado
 	}
 }
 

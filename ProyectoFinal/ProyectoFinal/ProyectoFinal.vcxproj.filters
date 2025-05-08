@@ -20,18 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\core.frag">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
-    <None Include="Shader\core.vs">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
-    <None Include="Shader\modelLoading.frag">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
-    <None Include="Shader\modelLoading.vs">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
     <None Include="Shader\lamp.frag">
       <Filter>Archivos de encabezado</Filter>
     </None>
@@ -42,6 +30,12 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Shader\lighting.vs">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="skybox.vert">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="skybox.frag">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>
