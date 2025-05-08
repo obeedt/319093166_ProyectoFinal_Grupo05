@@ -300,6 +300,8 @@ int main()
 		Pared_Cocina.Draw(lightingShader);
 		//Puerta
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-16.8f, 4.7f, -19.5f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta_Cocina.Draw(lightingShader);
 		////Ventana
@@ -308,6 +310,8 @@ int main()
 		//Ventana_Cocina.Draw(lightingShader);
 		//Pared Madera
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-18.8f, 4.7f, -19.5f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Madera.Draw(lightingShader);
 
