@@ -41,10 +41,13 @@ GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
+
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
-
+bool isNight = false; // Para determinar si es de noche o día
+float transitionSpeed = 1.0f; // Velocidad de transición de día a noche
+bool keyPressed = false; // Para almacenar el estado previo de la tecla V
 
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 float vertices[] = {
@@ -105,14 +108,7 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 
 int main()
 {
-	// Init GLFW
 	glfwInit();
-	// Set all the required options for GLFW
-	/*glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Final - Computacion Grafica", nullptr, nullptr);
@@ -219,18 +215,54 @@ int main()
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
+		// Interpolación entre día y noche
+		float timeOfDay = isNight ? 1.0f : 0.0f; // 1.0f = noche, 0.0f = día
+		float lerpFactor = timeOfDay * transitionSpeed; // Factores de interpolación
+
+		// Lerp para la dirección de la luz
+		glm::vec3 dayLightDir(-0.2f, -1.0f, -0.3f); // Dirección de luz de día
+		glm::vec3 nightLightDir(-0.2f, -1.0f, -0.3f); // Dirección de luz de noche (podrías cambiarla si quieres)
+
+		// Lerp para la luz ambiental
+		glm::vec3 dayAmbient(0.5f, 0.5f, 0.5f); // Luz ambiental de día
+		glm::vec3 nightAmbient(0.1f, 0.1f, 0.3f); // Luz ambiental de noche (más azul)
+
+		// Lerp para la luz difusa
+		glm::vec3 dayDiffuse(0.8f, 0.8f, 0.8f); // Luz difusa de día
+		glm::vec3 nightDiffuse(0.2f, 0.2f, 0.5f); // Luz difusa de noche
+
+		// Lerp para la luz especular
+		glm::vec3 daySpecular(0.5f, 0.5f, 0.5f); // Luz especular de día
+		glm::vec3 nightSpecular(0.2f, 0.2f, 0.5f); // Luz especular de noche
+
+		// Lerp para la brillos del material
+		float dayShininess = 32.0f;
+		float nightShininess = 16.0f;
 
 		// Luz direccional
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.5f, 0.5f, 0.5f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.8f, 0.8f, 0.8f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+		// Actualizando los valores con interpolación
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"),
+			glm::mix(dayLightDir, nightLightDir, lerpFactor).x,
+			glm::mix(dayLightDir, nightLightDir, lerpFactor).y,
+			glm::mix(dayLightDir, nightLightDir, lerpFactor).z);
 
-		// Material
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 32.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"),
+			glm::mix(dayAmbient, nightAmbient, lerpFactor).x,
+			glm::mix(dayAmbient, nightAmbient, lerpFactor).y,
+			glm::mix(dayAmbient, nightAmbient, lerpFactor).z);
 
-		// Set material properties
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 16.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"),
+			glm::mix(dayDiffuse, nightDiffuse, lerpFactor).x,
+			glm::mix(dayDiffuse, nightDiffuse, lerpFactor).y,
+			glm::mix(dayDiffuse, nightDiffuse, lerpFactor).z);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"),
+			glm::mix(daySpecular, nightSpecular, lerpFactor).x,
+			glm::mix(daySpecular, nightSpecular, lerpFactor).y,
+			glm::mix(daySpecular, nightSpecular, lerpFactor).z);
+
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"),
+			glm::mix(dayShininess, nightShininess, lerpFactor));
 
 
 		// Configuración de la luz puntual
@@ -520,12 +552,12 @@ void DoMovement()
 		pointLightPositions[0].x -= 0.3f;
 	}
 
-	if (keys[GLFW_KEY_I])
+	if (keys[GLFW_KEY_UP])
 	{
 		pointLightPositions[0].y += 0.3f;
 	}
 
-	if (keys[GLFW_KEY_M])
+	if (keys[GLFW_KEY_DOWN])
 	{
 		pointLightPositions[0].y -= 0.3f;
 	}
@@ -559,7 +591,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			keys[key] = false;
 		}
 	}
-
+	if (keys[GLFW_KEY_N] && !keyPressed) {
+		isNight = !isNight; // Alterna entre noche y día
+		keyPressed = true; // Marca que la tecla ha sido presionada
+	}
+	else if (!keys[GLFW_KEY_N]) {
+		keyPressed = false; // Si la tecla se ha soltado, resetea el estado
+	}
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
