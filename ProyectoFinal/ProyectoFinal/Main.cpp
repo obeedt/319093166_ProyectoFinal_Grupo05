@@ -257,6 +257,8 @@ int main()
 		Casa.Draw(lightingShader);
 
 		////////////////////////-Cocina-////////////////////////////////
+		////////////////////////-Estructura-////////////////////////////////
+		// 
 		//Piso
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-16.77f, 4.1f, -15.0f));
@@ -296,6 +298,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Madera.Draw(lightingShader);
 
+		////////////////////////-Objetos-////////////////////////////////
 		//Alacena 1
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-19.0f, 4.74f, -17.57f));
