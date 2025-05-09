@@ -28,15 +28,13 @@
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
-// Function prototypes (añade esto junto con las otras declaraciones)
-void drawCoordinateAxes();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 5.0f, 85.0f));
+Camera  camera(glm::vec3(0.0f, 0.0f, 135.0f));
 //Camera  camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 GLfloat lastX = WIDTH / 2.0;
@@ -103,6 +101,7 @@ glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(-14.0f, 12.5f, -11.0f),
+	glm::vec3(-17.0f, 17.0f, 80.0f),
 };
 
 // Deltatime
@@ -156,7 +155,7 @@ int main()
 	//Modelos exterior
 	Model Casa((char*)"Models/casa.obj");
 	Model Arbusto((char*)"Models/arbusto.fbx");
-	//Model Arbol((char*)"Models/source/tree.fbx");
+	Model Arbol((char*)"Models/arbol.obj");
 	Model Farol((char*)"Models/faro.obj");
 
 	// Modelos interior
@@ -251,7 +250,6 @@ int main()
 		float nightShininess = 16.0f;
 
 		// Luz direccional
-		// Actualizando los valores con interpolación
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"),
 			glm::mix(dayLightDir, nightLightDir, lerpFactor).x,
 			glm::mix(dayLightDir, nightLightDir, lerpFactor).y,
@@ -280,21 +278,39 @@ int main()
 		float lightsOffFactor = lightsOff ? 0.0f : 1.0f; // Factor de luz apagada
 		float lerpFactor2 = lightsOff * 1.0f; // Factor de interpolación
 
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.position"),
+		// Luz puntual 1
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"),
 			pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
 
-		// Aplicar el factor de toggle a los componentes de luz
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.ambient"),
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"),
 			0.2f * lightsOffFactor, 0.2f * lightsOffFactor, 0.2f * lightsOffFactor);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.diffuse"),
-			1.5f * lightsOffFactor, 1.5f * lightsOffFactor, 1.5f * lightsOffFactor);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLight.specular"),
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"),
+			1.0f * lightsOffFactor, 1.0f * lightsOffFactor, 1.0f * lightsOffFactor);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"),
 			1.0f * lightsOffFactor, 1.0f * lightsOffFactor, 1.0f * lightsOffFactor);
 
-		// Estos parámetros no necesitan el factor
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.linear"), 0.09f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLight.quadratic"), 0.032f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.09f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032f);
+
+		// Configuración de la luz puntual 2
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"),
+			pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+
+		// Color amarillento (más intenso en el componente rojo y verde, menos azul)
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"),
+			0.5f * lightsOffFactor, 0.5f * lightsOffFactor, 0.1f * lightsOffFactor);  // Amarillo suave ambiental
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"),
+			3.0f * lightsOffFactor, 2.5f * lightsOffFactor, 1.0f * lightsOffFactor);  // Amarillo brillante difuso
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"),
+			1.5f * lightsOffFactor, 1.2f * lightsOffFactor, 0.3f * lightsOffFactor);  // Amarillo especular
+
+		// Parámetros de atenuación para mayor alcance (valores más bajos = mayor alcance)
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.05f);    // Reducido para mayor alcance
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.01f); // Reducido para mayor alcance
 
 		// Create camera transformations
 		glm::mat4 view;
@@ -316,18 +332,70 @@ int main()
 		view = camera.GetViewMatrix();
 
 		/////////////////////////-Ambientacion-////////////////////////////////
-		//Arbusto
+		//Arbusto central
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(58.0f, -10.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(17.0f, 17.0f, 17.0f));
+		model = glm::translate(model, glm::vec3(58.0f, -10.0f, 20.0f));
+		model = glm::scale(model, glm::vec3(18.0f, 20.0f, 18.0f));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Arbusto.Draw(lightingShader);
+		//Arbusto izquierdo
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(45.0f, -10.0f, 22.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbusto.Draw(lightingShader);
+		//Arbusto derecho
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(75.0f, -10.0f, 21.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbusto.Draw(lightingShader);
+		//Arbusto derecho 2
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(85.0f, -10.0f, 21.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbusto.Draw(lightingShader);
+
+		//Arbol derecha
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(90.0f, -10.0f, -30.0f));
+		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(lightingShader);
+		//Arbol izquierda
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-90.0f, -10.0f, 30.0f));
+		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(lightingShader);
+		//Arbol 1
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-80.0f, -10.0f, -30.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(lightingShader);
+		//Arbol 2
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-150.0f, -10.0f, -70.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(lightingShader);
+		//Arbol 2
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-230.0f, -10.0f, -70.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.Draw(lightingShader);
+		
 		//Faro
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-		//model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-17.0f, -10.0f, 80.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Farol.Draw(lightingShader);
 
@@ -346,21 +414,27 @@ int main()
 		Piso_Cocina.Draw(lightingShader);
 		//Techo
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(3.75f, 13.0f, 2.65f));
+		model = glm::translate(model, glm::vec3(3.75f, 13.65f, 2.65f));
 		model = glm::scale(model, glm::vec3(2.55f, 1.0f, 1.75));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
 
 		////////////////////////-Cocina-////////////////////////////////
 		////////////////////////-Estructura-////////////////////////////////
-		////Piso
+		//Piso
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-10.2f, 4.1f, -12.7f));
 		model = glm::scale(model, glm::vec3(1.28, 1.0f, 0.84f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
-		
+		//Techo
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-10.2f, 4.1f, -12.7f));
+		model = glm::scale(model, glm::vec3(1.28, 15.0f, 0.84f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Piso_Cocina.Draw(lightingShader);
 		//Pared izquierda
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-15.57f, 3.3f, -9.6f));
@@ -464,7 +538,6 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Alacena_Grande.Draw(lightingShader);
 
-
 		////Estufa
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-21.15f, 5.91f, -23.85f));	
@@ -474,25 +547,20 @@ int main()
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-19.2f, 6.1f, -23.4f));
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
-
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Campana.Draw(lightingShader);
-		
 		//Refrigerador
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-16.8f, 4.7f, -19.1f));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Refrigerador.Draw(lightingShader);
-
 		//Mesa
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-11.3, 6.82f, -11.75));
 		model = glm::scale(model, glm::vec3(0.85f, 0.9f, 0.85f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Mesa.Draw(lightingShader);
-		
-		
 		//Silla 1
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-15.3, 6.4f, -5.0f));
@@ -500,7 +568,6 @@ int main()
 		model = glm::rotate(model, glm::radians(315.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Silla.Draw(lightingShader);
-
 		//Silla 2
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-24.3, 6.4f, -9.6f));
@@ -508,7 +575,6 @@ int main()
 		model = glm::rotate(model, glm::radians(225.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Silla.Draw(lightingShader);
-
 		//Tostadora
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-11.5f, 4.74f, -16.5f));
@@ -516,7 +582,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
 		
-		
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -533,7 +599,7 @@ int main()
 		lampShader.Use();
 		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			glm::mat4 model(1);
 			model = glm::translate(model, pointLightPositions[i]);
 			model = glm::scale(model, glm::vec3(0.2f));
@@ -669,42 +735,4 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	lastY = yPos;
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
-}
-void drawCoordinateAxes() {
-	float axisVertices[] = {
-		// Eje X (Rojo)
-		0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Origen (rojo)
-		5.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // X positivo (rojo, 5 unidades)
-
-		// Eje Y (Verde)
-		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Origen (verde)
-		0.0f, 5.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y positivo (verde, 5 unidades)
-
-		// Eje Z (Azul)
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // Origen (azul)
-		0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 1.0f  // Z positivo (azul, 5 unidades)
-	};
-
-	GLuint axisVAO, axisVBO;
-	glGenVertexArrays(1, &axisVAO);
-	glGenBuffers(1, &axisVBO);
-
-	glBindVertexArray(axisVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices, GL_STATIC_DRAW);
-
-	// Posición (atributo 0)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// Color (atributo 1)
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glDrawArrays(GL_LINES, 0, 6); // Dibuja las líneas
-
-	// Limpieza
-	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &axisVAO);
-	glDeleteBuffers(1, &axisVBO);
 }
