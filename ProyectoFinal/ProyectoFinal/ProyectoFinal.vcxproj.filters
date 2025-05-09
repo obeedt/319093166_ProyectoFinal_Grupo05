@@ -32,12 +32,6 @@
     <None Include="Shader\lighting.vs">
       <Filter>Archivos de encabezado</Filter>
     </None>
-    <None Include="skybox.vert">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
-    <None Include="skybox.frag">
-      <Filter>Archivos de encabezado</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">

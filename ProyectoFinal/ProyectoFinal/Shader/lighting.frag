@@ -34,7 +34,7 @@ out vec4 color;
 
 uniform vec3 viewPos;
 uniform DirLight dirLight;
-uniform PointLight pointLight;  // Cambiado de pointLights[0] a pointLight para simplificar
+uniform PointLight pointLights[2];  // Cambiado a array de 2 luces
 uniform Material material;
 
 // Function prototypes
@@ -50,11 +50,17 @@ void main()
     // Luz direccional
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
     
-    // Luz puntual
-    result += CalcPointLight(pointLight, norm, FragPos, viewDir);
+    // Luces puntuales
+    for(int i = 0; i < 2; i++)
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
     
-    color = vec4(result, 1.0);
+    vec4 texColor = texture(material.diffuse, TexCoords);
+    if (texColor.a < 0.1)
+        discard;
+
+    color = vec4(result, texColor.a);
 }
+
 
 // Calcula la contribución de la luz direccional
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
