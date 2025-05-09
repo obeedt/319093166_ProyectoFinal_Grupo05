@@ -26,8 +26,6 @@
     <None Include="Shader\lamp.vs" />
     <None Include="Shader\lighting.frag" />
     <None Include="Shader\lighting.vs" />
-    <None Include="skybox.frag" />
-    <None Include="skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

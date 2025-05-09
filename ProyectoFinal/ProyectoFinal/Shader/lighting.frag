@@ -53,7 +53,12 @@ void main()
     // Luz puntual
     result += CalcPointLight(pointLight, norm, FragPos, viewDir);
     
-    color = vec4(result, 1.0);
+    vec4 texColor = texture(material.diffuse, TexCoords);
+    if (texColor.a < 0.1)
+        discard; // descarta fragmentos muy transparentes
+
+    color = vec4(result, texColor.a); // usa el alpha real de la textura
+
 }
 
 // Calcula la contribución de la luz direccional

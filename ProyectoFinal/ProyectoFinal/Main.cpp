@@ -194,6 +194,8 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 int main()
 {
 	glfwInit();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Proyecto Final - Computacion Grafica", nullptr, nullptr);
@@ -257,8 +259,11 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
-	// Load models
+	//Modelos exterior
 	Model Casa((char*)"Models/casa.obj");
+	Model Arbusto((char*)"Models/arbusto.fbx");
+
+	// Modelos interior
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
 	Model Ventana_Cocina((char*)"Models/ventana_cocina.obj");
 	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
@@ -274,7 +279,7 @@ int main()
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
-	
+
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -413,6 +418,15 @@ int main()
 
 		//Carga de modelos
 		view = camera.GetViewMatrix();
+
+		/////////////////////////-Ambientacion-////////////////////////////////
+		//Arbusto
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(58.0f, -10.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(17.0f, 17.0f, 17.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Arbusto.Draw(lightingShader);
 
 		/////////////////////////-Fachada-////////////////////////////////
 		//Casa
@@ -599,20 +613,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
 		
-		//glDepthFunc(GL_LEQUAL);  // Cambiar la función de profundidad
-		//skyboxShader.Use();
-		//glm::mat4 view = camera.GetViewMatrix();
-		//view = glm::mat4(glm::mat3(view));
-		//glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		//glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-		//// skybox cube
-		//glBindVertexArray(skyboxVAO);
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-		//glBindVertexArray(0);
-		//glDepthFunc(GL_LESS); // Volver a la función de profundidad por defecto
+		
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -642,17 +643,6 @@ int main()
 		}
 
 
-
-		// Dibujar ejes de coordenadas
-		//lampShader.Use();
-		//glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		//glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-		//glm::mat4 axisModel = glm::mat4(1.0f);
-		//glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(axisModel));
-
-		//drawCoordinateAxes(); // ¡Ahora el compilador la reconoce!
-		//// Swap the screen buffers
 
 		glfwSwapBuffers(window);
 	}
