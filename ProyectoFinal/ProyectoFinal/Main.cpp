@@ -430,8 +430,8 @@ int main()
 		Piso_Cocina.Draw(lightingShader);
 		//Techo
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-10.2f, 4.1f, -12.7f));
-		model = glm::scale(model, glm::vec3(1.28, 15.0f, 0.84f));
+		model = glm::translate(model, glm::vec3(-10.2f, 13.0f, -12.7f));
+		model = glm::scale(model, glm::vec3(1.28, 1.0f, 0.84f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
@@ -631,7 +631,7 @@ void DoMovement()
 	float multiplier = 1.0f;
 	if (keys[GLFW_KEY_LEFT_CONTROL])
 	{
-		multiplier = 5.0f;
+		multiplier = 6.0f;
 	}
 
 	if (keys[GLFW_KEY_W]) {
