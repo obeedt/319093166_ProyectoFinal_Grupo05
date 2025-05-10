@@ -157,6 +157,8 @@ int main()
 	Model Arbusto((char*)"Models/arbusto.fbx");
 	Model Arbol((char*)"Models/arbol.obj");
 	Model Farol((char*)"Models/faro.obj");
+	Model Cesped((char*)"Models/cesped.obj");
+	Model Cielo((char*)"Models/cieloo.obj");
 
 	// Modelos interior
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
@@ -398,6 +400,20 @@ int main()
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Farol.Draw(lightingShader);
+
+		//Cesped
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-17.0f, -13.0f, 80.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Cesped.Draw(lightingShader);
+
+		//Cielo
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-17.0f, -14.0f, 80.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Cielo.Draw(lightingShader);
 
 		/////////////////////////-Fachada-////////////////////////////////
 		//Casa
