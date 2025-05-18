@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <cmath>
 
 // GLEW
@@ -45,8 +45,8 @@ bool firstMouse = true;
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
-bool isNight = false; // Para determinar si es de noche o día
-float transitionSpeed = 1.0f; // Velocidad de transición de día a noche
+bool isNight = false; // Para determinar si es de noche o dï¿½a
+float transitionSpeed = 1.0f; // Velocidad de transiciï¿½n de dï¿½a a noche
 bool keyPressed = false; // Para almacenar el estado previo de la tecla N
 bool lightsOff = false;
 bool keyPressed2 = false; // Para almacenar el estado previo de la tecla L
@@ -96,7 +96,7 @@ float vertices[] = {
 	   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
-glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f); 
+glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
 
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
@@ -160,7 +160,7 @@ int main()
 	Model Cesped((char*)"Models/cesped.obj");
 	Model Cielo((char*)"Models/cieloo.obj");
 
-	// Modelos interior
+	// Modelos interior cocina
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
 	Model Ventana_Cocina((char*)"Models/ventana_cocina.obj");
 	Model Pared_Cocina((char*)"Models/pared_cocina.obj");
@@ -176,6 +176,9 @@ int main()
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
+
+	// Modelo de la sala
+	Model Sala((char*)"Models/sala.obj");
 
 
 	// First, set the container's VAO (and VBO)
@@ -197,7 +200,7 @@ int main()
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
-	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 200.0f);	
+	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 200.0f);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -227,24 +230,24 @@ int main()
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
-		// Interpolación entre día y noche
-		float timeOfDay = isNight ? 1.0f : 0.0f; // 1.0f = noche, 0.0f = día
-		float lerpFactor = timeOfDay * transitionSpeed; // Factores de interpolación
+		// Interpolaciï¿½n entre dï¿½a y noche
+		float timeOfDay = isNight ? 1.0f : 0.0f; // 1.0f = noche, 0.0f = dï¿½a
+		float lerpFactor = timeOfDay * transitionSpeed; // Factores de interpolaciï¿½n
 
-		// Lerp para la dirección de la luz
-		glm::vec3 dayLightDir(-0.2f, -1.0f, -0.3f); // Dirección de luz de día
-		glm::vec3 nightLightDir(-0.2f, -1.0f, -0.3f); // Dirección de luz de noche (podrías cambiarla si quieres)
+		// Lerp para la direcciï¿½n de la luz
+		glm::vec3 dayLightDir(-0.2f, -1.0f, -0.3f); // Direcciï¿½n de luz de dï¿½a
+		glm::vec3 nightLightDir(-0.2f, -1.0f, -0.3f); // Direcciï¿½n de luz de noche (podrï¿½as cambiarla si quieres)
 
 		// Lerp para la luz ambiental
-		glm::vec3 dayAmbient(0.5f, 0.5f, 0.5f); // Luz ambiental de día
-		glm::vec3 nightAmbient(0.1f, 0.1f, 0.3f); // Luz ambiental de noche (más azul)
+		glm::vec3 dayAmbient(0.5f, 0.5f, 0.5f); // Luz ambiental de dï¿½a
+		glm::vec3 nightAmbient(0.1f, 0.1f, 0.3f); // Luz ambiental de noche (mï¿½s azul)
 
 		// Lerp para la luz difusa
-		glm::vec3 dayDiffuse(0.8f, 0.8f, 0.8f); // Luz difusa de día
+		glm::vec3 dayDiffuse(0.8f, 0.8f, 0.8f); // Luz difusa de dï¿½a
 		glm::vec3 nightDiffuse(0.2f, 0.2f, 0.5f); // Luz difusa de noche
 
 		// Lerp para la luz especular
-		glm::vec3 daySpecular(0.5f, 0.5f, 0.5f); // Luz especular de día
+		glm::vec3 daySpecular(0.5f, 0.5f, 0.5f); // Luz especular de dï¿½a
 		glm::vec3 nightSpecular(0.2f, 0.2f, 0.5f); // Luz especular de noche
 
 		// Lerp para la brillos del material
@@ -276,9 +279,9 @@ int main()
 			glm::mix(dayShininess, nightShininess, lerpFactor));
 
 
-		// Configuración de la luz puntual 1
+		// Configuraciï¿½n de la luz puntual 1
 		float lightsOffFactor = lightsOff ? 0.0f : 1.0f; // Factor de luz apagada
-		float lerpFactor2 = lightsOff * 1.0f; // Factor de interpolación
+		float lerpFactor2 = lightsOff * 1.0f; // Factor de interpolaciï¿½n
 
 		// Luz puntual 1
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"),
@@ -295,11 +298,11 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.09f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032f);
 
-		// Configuración de la luz puntual 2
+		// Configuraciï¿½n de la luz puntual 2
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"),
 			pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
 
-		// Color amarillento (más intenso en el componente rojo y verde, menos azul)
+		// Color amarillento (mï¿½s intenso en el componente rojo y verde, menos azul)
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"),
 			0.5f * lightsOffFactor, 0.5f * lightsOffFactor, 0.1f * lightsOffFactor);  // Amarillo suave ambiental
 
@@ -309,7 +312,7 @@ int main()
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"),
 			1.5f * lightsOffFactor, 1.2f * lightsOffFactor, 0.3f * lightsOffFactor);  // Amarillo especular
 
-		// Parámetros de atenuación para mayor alcance (valores más bajos = mayor alcance)
+		// Parï¿½metros de atenuaciï¿½n para mayor alcance (valores mï¿½s bajos = mayor alcance)
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.05f);    // Reducido para mayor alcance
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.01f); // Reducido para mayor alcance
@@ -393,7 +396,7 @@ int main()
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Arbol.Draw(lightingShader);
-		
+
 		//Faro
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-17.0f, -10.0f, 80.0f));
@@ -430,16 +433,25 @@ int main()
 		Piso_Cocina.Draw(lightingShader);
 		//Techo
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(3.75f, 13.65f, 2.65f));
+		model = glm::translate(model, glm::vec3(3.75f, 13.7f, 2.65f));
 		model = glm::scale(model, glm::vec3(2.55f, 1.0f, 1.75));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
 
+		///////////////////////////-Sala-////////////////////////////////
+		//Cuarto completo de la sala
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(-9.91f, 4.1f, 10.0f));
+		model = glm::scale(model, glm::vec3(1.0, 1.0f, 1.0f));
+		//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); 
+		Sala.Draw(lightingShader);
+		
 		////////////////////////-Cocina-////////////////////////////////
 		////////////////////////-Estructura-////////////////////////////////
 		//Piso
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-10.2f, 4.1f, -12.7f));
+		model = glm::translate(model, glm::vec3(-10.2f, 4.1f, -12.6f));
 		model = glm::scale(model, glm::vec3(1.28, 1.0f, 0.84f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -466,7 +478,7 @@ int main()
 		//Pared posterior
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-10.2f, 3.3f, -32.3f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 2.06f, 1.28f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pared_Cocina.Draw(lightingShader);
@@ -515,7 +527,7 @@ int main()
 		model = glm::translate(model, glm::vec3(-19.0f, 4.74f, -17.57f));
 		model = glm::scale(model, glm::vec3(1.2f, 1.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Alacena.Draw(lightingShader);	
+		Alacena.Draw(lightingShader);
 		////Alacena 2
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-21.1f, 4.74f, -14.0f));
@@ -556,7 +568,7 @@ int main()
 
 		////Estufa
 		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(-21.15f, 5.91f, -23.85f));	
+		model = glm::translate(model, glm::vec3(-21.15f, 5.91f, -23.85f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Estufa.Draw(lightingShader);
 		////Campana
@@ -597,7 +609,7 @@ int main()
 		model = glm::rotate(model, glm::radians(315.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
-		
+
 
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -719,7 +731,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 	if (keys[GLFW_KEY_N] && !keyPressed) {
-		isNight = !isNight; // Alterna entre noche y día
+		isNight = !isNight; // Alterna entre noche y dï¿½a
 		keyPressed = true; // Marca que la tecla ha sido presionada
 	}
 	else if (!keys[GLFW_KEY_N]) {
@@ -727,7 +739,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 
 	if (keys[GLFW_KEY_L] && !keyPressed) {
-		lightsOff = !lightsOff; // Alterna entre noche y día
+		lightsOff = !lightsOff; // Alterna entre noche y dï¿½a
 		keyPressed2 = true; // Marca que la tecla ha sido presionada
 	}
 	else if (!keys[GLFW_KEY_L]) {
