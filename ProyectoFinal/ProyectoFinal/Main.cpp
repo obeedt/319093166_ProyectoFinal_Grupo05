@@ -28,6 +28,8 @@
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
+void Animation(float deltaTime);
+void Animation_garage(float deltaTime);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -98,6 +100,19 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
 
+//Animacion puerta
+bool animPuerta = false;
+bool abriendo = true;
+float rotPuerta= 0.0f;
+float pivotOffset = 0.5f; // Ajusta según tu modelo
+float doorSpeed = 90.0f; // Grados por segundo
+
+bool animGarage = false;
+float rotPuerta_Garage = 0.0f;
+bool abriendoGarage = true;
+float pivotOffsetGarage = 0.5f; // Ajusta según tu modelo
+
+
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(-14.0f, 12.5f, -11.0f),
@@ -153,12 +168,13 @@ int main()
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
 	//Modelos exterior
-	Model Casa((char*)"Models/casa.obj");
+	Model Casa((char*)"Models/casa2.obj");
 	Model Arbusto((char*)"Models/arbusto.fbx");
 	Model Arbol((char*)"Models/arbol.obj");
 	Model Farol((char*)"Models/faro.obj");
 	Model Cesped((char*)"Models/cesped.obj");
 	Model Cielo((char*)"Models/cieloo.obj");
+	Model Garage((char*)"Models/garage.obj");
 
 	// Modelos interior cocina
 	Model Puerta_Cocina((char*)"Models/puerta_cocina.obj");
@@ -176,6 +192,9 @@ int main()
 	Model Refrigerador((char*)"Models/refrigerador.obj");
 	Model Silla((char*)"Models/silla.obj");
 	Model Tostadora((char*)"Models/tostadora.obj");
+
+	Model Puerta((char*)"Models/puertaAnim.obj");
+	Model Puerta_Garage((char*)"Models/puerta_garage.obj");
 
 	// Modelo de la sala
 	Model Sala((char*)"Models/sala.obj");
@@ -200,7 +219,7 @@ int main()
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
-	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 200.0f);
+	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 350.0f);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -213,6 +232,8 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
+		Animation(deltaTime);
+		Animation_garage(deltaTime);
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -438,15 +459,22 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso_Cocina.Draw(lightingShader);
 
+		//Garage
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(9.4f, -4.35f, 23.0f)); // 3. Mover de vuelta
+		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Garage.Draw(lightingShader);
+
 		///////////////////////////-Sala-////////////////////////////////
 		//Cuarto completo de la sala
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(-9.91f, 4.1f, 10.0f));
 		model = glm::scale(model, glm::vec3(1.0, 1.0f, 1.0f));
 		//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); 
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Sala.Draw(lightingShader);
-		
+
 		////////////////////////-Cocina-////////////////////////////////
 		////////////////////////-Estructura-////////////////////////////////
 		//Piso
@@ -610,7 +638,25 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tostadora.Draw(lightingShader);
 
+		//////////////////////////-Animaciones-////////////////////////////////
+		// Puerta abriendo/cerrandose
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(pivotOffset+2.0f, 10.0f, 17.0f)); // 3. Mover de vuelta
+		model = glm::scale(model, glm::vec3(3.3f, 3.3f, 3.3f));
+		model = glm::rotate(model, glm::radians(-rotPuerta), glm::vec3(0, 1, 0)); // 2. Rotar
+		model = glm::translate(model, glm::vec3(-pivotOffset, 0.0f, 0.0f)); // 1. Mover al origen
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta.Draw(lightingShader);
 
+		//Puerta garage
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(pivotOffsetGarage + 23.0f, 0.35f, 24.0f)); // 3. Mover de vuelta
+		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, glm::radians(rotPuerta_Garage), glm::vec3(0, 1, 0)); // 2. Rotar
+		model = glm::translate(model, glm::vec3(-pivotOffsetGarage, 0.0f, 0.0f)); // 1. Mover al origen
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Puerta_Garage.Draw(lightingShader);
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -745,7 +791,56 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	else if (!keys[GLFW_KEY_L]) {
 		keyPressed2 = false; // Si la tecla se ha soltado, resetea el estado
 	}
+
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+		animPuerta = !animPuerta;
+	}
+
+	if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+		animGarage = !animGarage;
+	}
+
 }
+
+void Animation(float deltaTime) {
+	if (!animPuerta) return;
+
+	float rotation = doorSpeed * deltaTime;
+	rotPuerta += abriendo ? rotation : -rotation;
+
+	// Limitar rotación y alternar estado
+	if (abriendo && rotPuerta >= 90.0f) {
+		rotPuerta = 90.0f;
+		abriendo = false;
+		animPuerta = false; // Opcional: detener animación al llegar
+	}
+	else if (!abriendo && rotPuerta <= 0.0f) {
+		rotPuerta = 0.0f;
+		abriendo = true;
+		animPuerta = false; // Opcional: detener animación al llegar
+	}
+}
+
+void Animation_garage(float deltaTime) {
+	if (!animGarage) return;
+
+	float rotation = doorSpeed * deltaTime;
+	rotPuerta_Garage += abriendoGarage ? rotation : -rotation;
+
+	// Limitar rotación y alternar estado
+	if (abriendoGarage && rotPuerta_Garage >= 90.0f) {
+		rotPuerta_Garage = 90.0f;
+		abriendoGarage = false;
+		animGarage = false;
+	}
+	else if (!abriendoGarage && rotPuerta_Garage <= 0.0f) {
+		rotPuerta_Garage = 0.0f;
+		abriendoGarage = true;
+		animGarage = false; 
+	}
+}
+
+
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
