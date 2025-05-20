@@ -107,7 +107,7 @@ glm::vec3 Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
 //Animacion puerta
 bool animPuerta = false;
 bool abriendo = true;
-float rotPuerta= 0.0f;
+float rotPuerta = 0.0f;
 float pivotOffset = 0.5f; // Ajusta según tu modelo
 float doorSpeed = 90.0f; // Grados por segundo
 
@@ -273,7 +273,7 @@ int main()
 		Animation_garage(deltaTime);
 		AnimationCarrito(deltaTime);
 		updateNoiseTexture();
-		
+
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -679,7 +679,7 @@ int main()
 		//////////////////////////-Animaciones-////////////////////////////////
 		// Puerta abriendo/cerrandose
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(pivotOffset+2.0f, 10.0f, 17.0f)); // 3. Mover de vuelta
+		model = glm::translate(model, glm::vec3(pivotOffset + 2.0f, 10.0f, 17.0f)); // 3. Mover de vuelta
 		model = glm::scale(model, glm::vec3(3.3f, 3.3f, 3.3f));
 		model = glm::rotate(model, glm::radians(-rotPuerta), glm::vec3(0, 1, 0)); // 2. Rotar
 		model = glm::translate(model, glm::vec3(-pivotOffset, 0.0f, 0.0f)); // 1. Mover al origen
@@ -747,12 +747,12 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		
+
 		lightingShader.Use();
 		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
-		
+
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
 		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
@@ -939,7 +939,7 @@ void Animation_garage(float deltaTime) {
 	else if (!abriendoGarage && rotPuerta_Garage <= 0.0f) {
 		rotPuerta_Garage = 0.0f;
 		abriendoGarage = true;
-		animGarage = false; 
+		animGarage = false;
 	}
 }
 
