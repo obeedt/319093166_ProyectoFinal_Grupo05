@@ -23,6 +23,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Texture.h"
 
 // Function prototypes
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -31,7 +32,7 @@ void DoMovement();
 void Animation(float deltaTime);
 void Animation_garage(float deltaTime);
 void AnimationCarrito(float deltaTime);
-void AnimacionTV(float deltaTime);
+void updateNoiseTexture(); // Función que definiremos después
 
 
 // Window dimensions
@@ -128,13 +129,13 @@ const float velocidadGiro = 200.0f; // Grados/segundo de rotación (ajusta segú
 const int vueltasRequeridas = 2;    // Número de vueltas completas antes de regresar
 
 //animacion tele
-enum EstadoTV { APAGADA, ENCENDIENDO, PRENDIDA, APAGANDO };
-EstadoTV estadoTV = APAGADA; // ¡Ahora inicia APAGADA!
-float progresoAnimacion = 0.0f;
-const float velocidadAnimacion = 0.7f; // Velocidad ajustable
-float radio = 0.0f;
-float alturaLinea = 0.0f;
-bool mostrarPantalla = false; // Control de visibilidad
+// Global variables
+GLuint tvScreenTexture;      // Texture for static effect
+GLuint tvOffTexture;         // Texture for black screen (off state)
+GLuint tvNoiseTexture;       // Procedural noise texture
+bool tvOn = false;
+float tvNoiseIntensity = 0.5f;
+float animationTime = 0.0f;  // Renamed to avoid ambiguity with std::time
 
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
@@ -189,6 +190,16 @@ int main()
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
+	// Cargar shader especial para TV
+	Shader tvShader("shaders/tv.vs", "shaders/tv.frag");
+	// Load textures
+	tvScreenTexture = TextureLoading::LoadTexture("Models/ruido.jpg"); // Static noise image
+	tvOffTexture = TextureLoading::LoadTexture("Models/negro.jpg");     // Black screen image
+
+	// Create procedural noise texture
+	glGenTextures(1, &tvNoiseTexture);
+	updateNoiseTexture(); // Initialize noise texture
+
 
 	//Modelos exterior
 	Model Casa((char*)"Models/casa.obj");
@@ -253,6 +264,7 @@ int main()
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		animationTime += deltaTime;
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
@@ -260,7 +272,7 @@ int main()
 		Animation(deltaTime);
 		Animation_garage(deltaTime);
 		AnimationCarrito(deltaTime);
-		AnimacionTV(deltaTime);
+		updateNoiseTexture();
 		
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -377,7 +389,6 @@ int main()
 		// Pass the matrices to the shader
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 
 		glm::mat4 model(1);
 
@@ -705,28 +716,43 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Tele.Draw(lightingShader);
 
-		// Renderizar pantalla solo cuando sea visible
-		if (mostrarPantalla) {
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(-23.4f, 8.15f, 8.2f));
-			model = glm::scale(model, glm::vec3(0.45f, 0.45f, 0.45f));
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// Draw TV screen (with appropriate texture)
+		tvShader.Use();
+		modelLoc = glGetUniformLocation(tvShader.Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		tvShader.setMat4("view", view);
+		tvShader.setMat4("projection", projection);
+		tvShader.setFloat("time", animationTime);
+		tvShader.setFloat("noiseIntensity", tvNoiseIntensity);
+		tvShader.setBool("tvOn", tvOn);
 
-			// Aplicar animación si está en progreso
-			if (estadoTV != PRENDIDA && estadoTV != APAGADA) {
-				model = glm::scale(model, glm::vec3(
-					radio,                 // Expansión horizontal (círculo)
-					alturaLinea,           // Expansión vertical (línea)
-					0.2f + 0.8f * radio    // Profundidad 3D (efecto de "entrada")
-				));
-			}
+		// Bind textures for TV
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tvOn ? tvScreenTexture : tvOffTexture);
+		tvShader.setInt("screenTexture", 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, tvNoiseTexture);
+		tvShader.setInt("noiseTexture", 1);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, tvOffTexture);
+		tvShader.setInt("offTexture", 2);
 
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			PantallaTele.Draw(lightingShader);
-		}
+		// Draw TV screen
+		PantallaTele.Draw(tvShader);
 
-
-
+		// Unbind textures to prevent leakage
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		
+		lightingShader.Use();
+		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
+		
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
 		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
@@ -874,14 +900,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 
 	if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-		if (estadoTV == APAGADA) {
-			estadoTV = ENCENDIENDO;
-			mostrarPantalla = true; // Mostrar al comenzar a encender
-		}
-		else if (estadoTV == PRENDIDA) {
-			estadoTV = APAGANDO;
-		}
-		// Ignorar si ya está en transición
+		tvOn = !tvOn;
 	}
 
 }
@@ -957,44 +976,21 @@ void AnimationCarrito(float deltaTime) {
 	}
 }
 
-void AnimacionTV(float deltaTime) {
-	switch (estadoTV) {
-	case ENCENDIENDO:
-		progresoAnimacion += velocidadAnimacion * deltaTime;
-		if (progresoAnimacion >= 1.0f) {
-			progresoAnimacion = 1.0f;
-			estadoTV = PRENDIDA;
-			mostrarPantalla = true;
-		}
-		break;
-
-	case APAGANDO:
-		progresoAnimacion -= velocidadAnimacion * deltaTime;
-		if (progresoAnimacion <= 0.0f) {
-			progresoAnimacion = 0.0f;
-			estadoTV = APAGADA;
-			mostrarPantalla = false; // ¡Ahora se oculta completamente!
-		}
-		break;
-
-	default:
-		break;
+//Function to update procedural noise texture
+void updateNoiseTexture() {
+	std::vector<unsigned char> noiseData(256 * 256 * 3);
+	for (int i = 0; i < 256 * 256 * 3; ++i) {
+		noiseData[i] = rand() % 256;
 	}
-
-	// Cálculo de efectos visuales
-	if (estadoTV == ENCENDIENDO || estadoTV == APAGANDO) {
-		// Fase 1: Círculo que crece (primer 40% del tiempo)
-		if (progresoAnimacion <= 0.4f) {
-			radio = glm::smoothstep(0.0f, 0.4f, progresoAnimacion);
-			alturaLinea = 0.0f;
-		}
-		// Fase 2: Línea que se expande (último 60%)
-		else {
-			radio = 1.0f;
-			alturaLinea = glm::smoothstep(0.4f, 1.0f, progresoAnimacion);
-		}
-	}
+	glBindTexture(GL_TEXTURE_2D, tvNoiseTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, noiseData.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
