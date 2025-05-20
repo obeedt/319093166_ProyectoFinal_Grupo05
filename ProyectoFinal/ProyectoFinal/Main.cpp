@@ -30,6 +30,9 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation(float deltaTime);
 void Animation_garage(float deltaTime);
+void AnimationCarrito(float deltaTime);
+void AnimacionTV(float deltaTime);
+
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -107,11 +110,31 @@ float rotPuerta= 0.0f;
 float pivotOffset = 0.5f; // Ajusta según tu modelo
 float doorSpeed = 90.0f; // Grados por segundo
 
+//Animacion garage
 bool animGarage = false;
 float rotPuerta_Garage = 0.0f;
 bool abriendoGarage = true;
 float pivotOffsetGarage = 0.5f; // Ajusta según tu modelo
 
+//Animacion carrito
+bool animCarrito = false;       // Activa/desactiva la animación
+float posCarrito = 0.0f;        // Posición actual (0 a distanciaTotal)
+const float distanciaTotal = 45.0f; // Distancia máxima de recorrido
+const float velocidadCarrito = 11.0f; // Unidades por segundo
+bool enPosicionFinal = false;   // Estado del carrito
+bool girando = false;               // Controla si está en modo "giro"
+float anguloGiro = 0.0f;           // Ángulo acumulado de rotación
+const float velocidadGiro = 200.0f; // Grados/segundo de rotación (ajusta según necesidad)
+const int vueltasRequeridas = 2;    // Número de vueltas completas antes de regresar
+
+//animacion tele
+enum EstadoTV { APAGADA, ENCENDIENDO, PRENDIDA, APAGANDO };
+EstadoTV estadoTV = APAGADA; // ¡Ahora inicia APAGADA!
+float progresoAnimacion = 0.0f;
+const float velocidadAnimacion = 0.7f; // Velocidad ajustable
+float radio = 0.0f;
+float alturaLinea = 0.0f;
+bool mostrarPantalla = false; // Control de visibilidad
 
 // Luces puntuales
 glm::vec3 pointLightPositions[] = {
@@ -168,7 +191,7 @@ int main()
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 
 	//Modelos exterior
-	Model Casa((char*)"Models/casa2.obj");
+	Model Casa((char*)"Models/casa.obj");
 	Model Arbusto((char*)"Models/arbusto.fbx");
 	Model Arbol((char*)"Models/arbol.obj");
 	Model Farol((char*)"Models/faro.obj");
@@ -195,10 +218,12 @@ int main()
 
 	Model Puerta((char*)"Models/puertaAnim.obj");
 	Model Puerta_Garage((char*)"Models/puerta_garage.obj");
+	Model Carrito((char*)"Models/carrito.obj");
 
 	// Modelo de la sala
 	Model Sala((char*)"Models/sala.obj");
-
+	Model Tele((char*)"Models/tele.obj");
+	Model PantallaTele((char*)"Models/pantalla.obj"); // Modelo plano para la pantalla
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -234,7 +259,9 @@ int main()
 		DoMovement();
 		Animation(deltaTime);
 		Animation_garage(deltaTime);
-
+		AnimationCarrito(deltaTime);
+		AnimacionTV(deltaTime);
+		
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -648,7 +675,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta.Draw(lightingShader);
 
-		//Puerta garage
+		//Puerta garage abriendo arriba/abajo
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(pivotOffsetGarage + 23.0f, 0.35f, 24.0f)); // 3. Mover de vuelta
 		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
@@ -657,6 +684,48 @@ int main()
 		model = glm::translate(model, glm::vec3(-pivotOffsetGarage, 0.0f, 0.0f)); // 1. Mover al origen
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Puerta_Garage.Draw(lightingShader);
+
+		//Carrito golf moviendose adelante/atras
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(23.6f, -6.65f, 13.0f)); // Posición base
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, posCarrito));
+		if (girando) {
+			model = glm::rotate(model, glm::radians(anguloGiro), glm::vec3(0.0f, 1.0f, 0.0f));
+		}
+		model = glm::scale(model, glm::vec3(1.9f, 1.9f, 1.9f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Carrito.Draw(lightingShader);
+
+		//Tele prediendo
+		//Dibujar el cuerpo de la TV
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-23.4f, 7.85f, 8.2f));
+		model = glm::scale(model, glm::vec3(0.45f, 0.45f, 0.45f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Tele.Draw(lightingShader);
+
+		// Renderizar pantalla solo cuando sea visible
+		if (mostrarPantalla) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-23.4f, 8.15f, 8.2f));
+			model = glm::scale(model, glm::vec3(0.45f, 0.45f, 0.45f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			// Aplicar animación si está en progreso
+			if (estadoTV != PRENDIDA && estadoTV != APAGADA) {
+				model = glm::scale(model, glm::vec3(
+					radio,                 // Expansión horizontal (círculo)
+					alturaLinea,           // Expansión vertical (línea)
+					0.2f + 0.8f * radio    // Profundidad 3D (efecto de "entrada")
+				));
+			}
+
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			PantallaTele.Draw(lightingShader);
+		}
+
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -800,6 +869,21 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		animGarage = !animGarage;
 	}
 
+	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+		animCarrito = true; // Inicia la animación con cada pulsación
+	}
+
+	if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+		if (estadoTV == APAGADA) {
+			estadoTV = ENCENDIENDO;
+			mostrarPantalla = true; // Mostrar al comenzar a encender
+		}
+		else if (estadoTV == PRENDIDA) {
+			estadoTV = APAGANDO;
+		}
+		// Ignorar si ya está en transición
+	}
+
 }
 
 void Animation(float deltaTime) {
@@ -840,7 +924,77 @@ void Animation_garage(float deltaTime) {
 	}
 }
 
+void AnimationCarrito(float deltaTime) {
+	if (!animCarrito) return;
 
+	// Fase 1: Movimiento hacia el destino
+	if (!enPosicionFinal && !girando) {
+		posCarrito += velocidadCarrito * deltaTime;
+		if (posCarrito >= distanciaTotal) {
+			posCarrito = distanciaTotal;
+			girando = true; // Activa la fase de giro
+		}
+	}
+	// Fase 2: Giro en el destino
+	else if (girando) {
+		anguloGiro += velocidadGiro * deltaTime;
+
+		// Comprueba si completó las vueltas
+		if (anguloGiro >= 360.0f * vueltasRequeridas) {
+			anguloGiro = 0.0f;
+			girando = false;
+			enPosicionFinal = true; // Prepara el regreso
+		}
+	}
+	// Fase 3: Regreso al origen
+	else if (enPosicionFinal) {
+		posCarrito -= velocidadCarrito * deltaTime;
+		if (posCarrito <= 0.0f) {
+			posCarrito = 0.0f;
+			enPosicionFinal = false;
+			animCarrito = false; // Fin del ciclo
+		}
+	}
+}
+
+void AnimacionTV(float deltaTime) {
+	switch (estadoTV) {
+	case ENCENDIENDO:
+		progresoAnimacion += velocidadAnimacion * deltaTime;
+		if (progresoAnimacion >= 1.0f) {
+			progresoAnimacion = 1.0f;
+			estadoTV = PRENDIDA;
+			mostrarPantalla = true;
+		}
+		break;
+
+	case APAGANDO:
+		progresoAnimacion -= velocidadAnimacion * deltaTime;
+		if (progresoAnimacion <= 0.0f) {
+			progresoAnimacion = 0.0f;
+			estadoTV = APAGADA;
+			mostrarPantalla = false; // ¡Ahora se oculta completamente!
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	// Cálculo de efectos visuales
+	if (estadoTV == ENCENDIENDO || estadoTV == APAGANDO) {
+		// Fase 1: Círculo que crece (primer 40% del tiempo)
+		if (progresoAnimacion <= 0.4f) {
+			radio = glm::smoothstep(0.0f, 0.4f, progresoAnimacion);
+			alturaLinea = 0.0f;
+		}
+		// Fase 2: Línea que se expande (último 60%)
+		else {
+			radio = 1.0f;
+			alturaLinea = glm::smoothstep(0.4f, 1.0f, progresoAnimacion);
+		}
+	}
+}
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
